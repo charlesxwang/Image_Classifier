@@ -10,7 +10,7 @@ cd Image_Classifier
 ## Train a model
 
 ```bash
-python train.py --img_dir <IMAGE_DIRECTORY> --model_di<MODEL_DIRECTORY>
+python train.py --img_dir <IMAGE_DIRECTORY> --model_dir <MODEL_DIRECTORY>
 ```
 
 IMAGE_DIRECTORY is the directory where you have your images for training
@@ -49,10 +49,10 @@ It is better to run the above code on a GPU machine.
 Now you can use the trained model to predict on given images.
 
 ```
-python predict.py --image_dir <IMAGE_DIRECTORY> --model_path <MODEL_PATH>
+python predict.py --image_dir <IMAGE_DIRECTORY> --model_dir <MODEL_DIRECTORY>
 ```
 
 IMAGE_DIRECTORY is the directory of your images. 
 
-MODEL_PATH is the folder where you have your trained model saved.
+MODEL_DIRECTORY is the folder where you have your trained model saved.
 
