@@ -31,7 +31,7 @@ IMAGE_DIRECTORY is the directory where you have your images for training
 
 An image dataset for test that contains images of different rooves can be downloaded here:
 ```
-Charles Wang. (2019). Random satellite images of buildings (Version v1.0) [Data set]. Zenodo. http://doi.org/10.5281/zenodo.3521067
+https://zenodo.org/record/3986721/files/Roof_Satellite_Images.zip
 ```
 
 MODEL_DIRECTORY is the directory where the trained model will be saved. 
