@@ -13,6 +13,8 @@ parser.add_argument('--image_dir',help='The path of a folder containing images',
 parser.add_argument('--image_list',help='A list of image paths', nargs='+')
 
 parser.add_argument('--model_dir',help='The path of a folder where the model (h5) resides',type=str,required=True)
+parser.add_argument('--model_file',default='classifier.h5',help='The name of the model file (*.h5)',type=str)
+
 parser.add_argument('--class_names',help='List of class names', nargs='+')
 
 args = parser.parse_args()
@@ -20,6 +22,7 @@ args = parser.parse_args()
 img_dir = args.image_dir
 img_list = args.image_list
 model_dir = args.model_dir
+model_file = args.model_file
 class_names = args.class_names
 
 if img_list is None:
@@ -29,7 +32,7 @@ if img_list is None:
     else:
         img_list = glob(os.path.join(img_dir, "*.png"))
 
-model = load_model(os.path.join(model_dir, "classifier.h5"))
+model = load_model(os.path.join(model_dir, model_file))
 
 
 predictions = []
