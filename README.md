@@ -5,6 +5,7 @@
 ```bash
 git clone https://github.com/charlesxwang/Image_Classifier.git
 cd Image_Classifier
+pip install -r requirements.txt
 ```
 
 ## Train a model
