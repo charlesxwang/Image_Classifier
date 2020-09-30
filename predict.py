@@ -30,7 +30,10 @@ if img_list is None:
         print("You need to provide --image_dir or --image_list")
         exit()
     else:
-        img_list = glob(os.path.join(img_dir, "*.png"))
+        img_list = []
+        img_list += glob(os.path.join(img_dir, "*.png"))
+        img_list += glob(os.path.join(img_dir, "*.jpg"))
+        img_list += glob(os.path.join(img_dir, "*.jpeg"))
 
 model = load_model(os.path.join(model_dir, model_file))
 
@@ -45,4 +48,5 @@ for img_path in img_list:
   predictions.append(prediction)
   #class_names[prediction]
 
-print("Predictions: ", predictions)
+for img, pred in zip(img_list, predictions): 
+    print ("Image :  %s     Class : %d" %(img, pred)) 
