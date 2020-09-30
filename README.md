@@ -41,9 +41,6 @@ It is better to run the above code on a GPU machine.
 
 
 
-
-
-
 ## Predict
 
 
@@ -60,6 +57,24 @@ MODEL_DIRECTORY is the folder where you have your trained model saved.
 You need also to specify the name of your model file by --model_file <MODEL_FILE_NAME> if the name of your model file is not the default "classifier.h5".
 
 You can specify the name of classes like this --class_names <CLASS_A> <CLASS_B> ...
+
+
+### Example 1: Roof type classification
+
+A pre-trained model for roof type classification can be downloaded from [here](https://doi.org/10.5281/zenodo.4059083). 
+
+This model takes a satellite image as input and predicts roof types (flat/gabled/hipped). To test it:
+
+```
+wget https://zenodo.org/record/4059084/files/roof_classifier_v0.1.h5
+python predict.py 
+        --image_dir <IMAGE_DIRECTORY> 
+        --model_dir . 
+        --model_file roof_classifier_v0.1.h5 
+        --class_names flat gabled hipped
+```
+
+
 
 
 
