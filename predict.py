@@ -35,6 +35,7 @@ if img_list is None:
         img_list += glob(os.path.join(img_dir, "*.jpg"))
         img_list += glob(os.path.join(img_dir, "*.jpeg"))
 
+print(os.path.join(model_dir, model_file))
 model = load_model(os.path.join(model_dir, model_file))
 
 
@@ -48,5 +49,9 @@ for img_path in img_list:
   predictions.append(prediction)
   #class_names[prediction]
 
+if class_names:
+    for i,p in enumerate(predictions):
+        predictions[i] = class_names[p]
+
 for img, pred in zip(img_list, predictions): 
-    print ("Image :  %s     Class : %d" %(img, pred)) 
+    print ("Image :  %s     Class : %s" %(img, pred)) 

@@ -50,10 +50,16 @@ It is better to run the above code on a GPU machine.
 Now you can use the trained model to predict on given images.
 
 ```
-python predict.py --image_dir <IMAGE_DIRECTORY> --model_dir <MODEL_DIRECTORY>
+python predict.py --image_dir <IMAGE_DIRECTORY> --model_dir <MODEL_DIRECTORY> 
 ```
 
 IMAGE_DIRECTORY is the directory of your images. 
 
 MODEL_DIRECTORY is the folder where you have your trained model saved.
+
+You need also to specify the name of your model file by --model_file <MODEL_FILE_NAME> if the name of your model file is not the default "classifier.h5".
+
+You can specify the name of classes like this --class_names <CLASS_A> <CLASS_B> ...
+
+
 
