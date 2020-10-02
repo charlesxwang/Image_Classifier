@@ -4,6 +4,7 @@ import os
 import tensorflow as tf
 import numpy as np
 from glob import glob
+import pandas as pd
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 
@@ -53,5 +54,8 @@ if class_names:
     for i,p in enumerate(predictions):
         predictions[i] = class_names[p]
 
-for img, pred in zip(img_list, predictions): 
-    print ("Image :  %s     Class : %s" %(img, pred)) 
+df = pd.DataFrame(list(zip(img_list, predictions)), columns =['image', 'prediction']) 
+df.to_csv('preds.csv', index=False)
+
+#for img, pred in zip(img_list, predictions): 
+#    print ("Image :  %s     Class : %s" %(img, pred)) 

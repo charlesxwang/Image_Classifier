@@ -3,3 +3,4 @@ tensorflow
 numpy
 glob3
 argparse
+pandas

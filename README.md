@@ -50,6 +50,8 @@ Now you can use the trained model to predict on given images.
 python predict.py --image_dir <IMAGE_DIRECTORY> --model_dir <MODEL_DIRECTORY> 
 ```
 
+The predictions will be written in preds.csv under the current directory.
+
 IMAGE_DIRECTORY is the directory of your images. 
 
 MODEL_DIRECTORY is the folder where you have your trained model saved.
