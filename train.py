@@ -1,6 +1,5 @@
 
 import argparse
-
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -8,37 +7,70 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.applications.inception_v3 import preprocess_input
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 parser = argparse.ArgumentParser(description='Train a classifier')
 
-parser.add_argument('--img_dir',help='The path of a folder containing images in subfolders',type=str,required=True)
-parser.add_argument('--model_dir',help='The path of a folder where model will be saved',type=str,required=True)
+parser.add_argument('--imgDir',help='The path of a folder containing images in subfolders',type=str,required=True)
+parser.add_argument('--modelDir',help='The path of a folder where model will be saved',type=str,required=True)
+parser.add_argument('--modelFile',default='classifier.h5',help='The name of the model file (*.h5) to be saved',type=str)
+parser.add_argument('--batch_size',default=32, help='Batch size',type=int)
+parser.add_argument('--lr1',default=0.0001, help='Learning rate 1',type=float)
+parser.add_argument('--lr2',default=0.00001, help='Learning rate 2',type=float)
+parser.add_argument('--it1',default=300, help='Iterations 1',type=int)
+parser.add_argument('--it2',default=1500, help='Iterations 2',type=int)
+parser.add_argument('--dropout',default=0.6, help='Dropout',type=float)
+parser.add_argument('--horizontalFlip',default=False, help='Horizontal flip',type=str2bool)
+parser.add_argument('--verticalFlip',default=False, help='Vertical flip',type=str2bool)
+parser.add_argument('--randomSeed',default=1993, help='Random seed',type=int)
+parser.add_argument('--randomRotation',default=0.0, help='Random rotation',type=float)
+
+parser.add_argument('--plot',default=True, help='Plot figures',type=str2bool)
 
 args = parser.parse_args()
 
-img_dir = args.img_dir
-save_dir = args.model_dir
+imgDir = args.imgDir
+modelDir = args.modelDir
+lr1 = args.lr1
+lr2 = args.lr2
+it1 = args.it1
+it2 = args.it2
+dropout = args.dropout
+horizontalFlip = args.horizontalFlip
+verticalFlip = args.verticalFlip
+randomseed = args.randomSeed
+randomRotation = args.randomRotation
+modelFile = args.modelFile
+
 
 ## 1. Prepare data
 
 image_size = (256, 256)
-batch_size = 32
+batch_size = args.batch_size # 32
 
 print('* First split the data with 8:2.')
 train_ds = image_dataset_from_directory(
-    img_dir,
+    imgDir,
     validation_split=0.2,
     subset="training",
-    seed=1993,
+    seed=randomseed,
     image_size=image_size,
     batch_size=batch_size,
     label_mode='categorical'
 )
 val_ds = image_dataset_from_directory(
-    img_dir,
+    imgDir,
     validation_split=0.2,
     subset="validation",
-    seed=1993,
+    seed=randomseed,
     image_size=image_size,
     batch_size=batch_size,
     label_mode='categorical'
@@ -75,23 +107,27 @@ base_model.trainable = False
 
 ### 2.2 Add preprocessing layers and a classification head to build the model
 
-data_augmentation = tf.keras.Sequential([
-  tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal'),
-  tf.keras.layers.experimental.preprocessing.RandomRotation(0.2),
-])
+# Augmentation
+aug_list = []
+if horizontalFlip: aug_list.append(tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal'))
+if verticalFlip: aug_list.append(tf.keras.layers.experimental.preprocessing.RandomFlip('vertical'))
+if randomRotation>0.0: aug_list.append(tf.keras.layers.experimental.preprocessing.RandomRotation(randomRotation))
+if len(aug_list)>0: data_augmentation = tf.keras.Sequential(aug_list)
 
 # Pre-processing layer
 inputs = tf.keras.Input(shape=image_size + (3,))
-x = data_augmentation(inputs)
-x = preprocess_input(x) 
-# augment
+if len(aug_list)>0: 
+    x = data_augmentation(inputs) # augment
+    x = preprocess_input(x) 
+else: x = preprocess_input(inputs) 
+
 
 # Then go into the backbone model
 x = base_model(x)
 
 # Then go into the classification header
 x = tf.keras.layers.GlobalAveragePooling2D()(x)
-x = tf.keras.layers.Dropout(0.6)(x) # You can change the dropout rate 
+x = tf.keras.layers.Dropout(dropout)(x) # You can change the dropout rate 
 prediction_layer = tf.keras.layers.Dense(len(class_names), activation='softmax')
 outputs = prediction_layer(x)
 
@@ -100,15 +136,14 @@ model = tf.keras.Model(inputs, outputs)
 
 ### 2.3 Compile the model
 
-base_learning_rate = 0.0001
-model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
+model.compile(optimizer=tf.keras.optimizers.Adam(lr=lr1),
               loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 model.summary()
 
 ## 3. Train the model
 
-initial_epochs = 100
+initial_epochs = it1
 history = model.fit(train_ds, epochs=initial_epochs, validation_data=val_ds)
 
 # Plot learning curves
@@ -119,24 +154,25 @@ val_acc = history.history['val_accuracy']
 loss = history.history['loss']
 val_loss = history.history['val_loss']
 
-plt.figure(figsize=(8, 8))
-plt.subplot(2, 1, 1)
-plt.plot(acc, label='Training Accuracy')
-plt.plot(val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.ylabel('Accuracy')
-plt.ylim([min(plt.ylim()),1])
-plt.title('Training and Validation Accuracy')
+if args.plot:
+    plt.figure(figsize=(8, 8))
+    plt.subplot(2, 1, 1)
+    plt.plot(acc, label='Training Accuracy')
+    plt.plot(val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.ylabel('Accuracy')
+    plt.ylim([min(plt.ylim()),1])
+    plt.title('Training and Validation Accuracy')
 
-plt.subplot(2, 1, 2)
-plt.plot(loss, label='Training Loss')
-plt.plot(val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.ylabel('Cross Entropy')
-plt.ylim([0,1.0])
-plt.title('Training and Validation Loss')
-plt.xlabel('epoch')
-plt.show()
+    plt.subplot(2, 1, 2)
+    plt.plot(loss, label='Training Loss')
+    plt.plot(val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.ylabel('Cross Entropy')
+    plt.ylim([0,1.0])
+    plt.title('Training and Validation Loss')
+    plt.xlabel('epoch')
+    plt.show()
 
 ## 4. Fine tuning
 
@@ -154,14 +190,14 @@ for layer in base_model.layers[:fine_tune_at]:
 
 ### 4.2 Compile the model
 
-model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate/10),
+model.compile(optimizer=tf.keras.optimizers.Adam(lr=lr2),
               loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 #model.summary()
 
 ### 4.3 Continue training the model
 
-fine_tune_epochs = 200
+fine_tune_epochs = it2
 total_epochs =  initial_epochs + fine_tune_epochs
 history_fine = model.fit(train_ds, epochs=total_epochs, initial_epoch=history.epoch[-1], validation_data=val_ds)
 
@@ -173,26 +209,27 @@ val_acc += history_fine.history['val_accuracy']
 loss += history_fine.history['loss']
 val_loss += history_fine.history['val_loss']
 
-plt.figure(figsize=(8, 8))
-plt.subplot(2, 1, 1)
-plt.plot(acc, label='Training Accuracy')
-plt.plot(val_acc, label='Validation Accuracy')
-plt.ylim([0.8, 1])
-plt.plot([initial_epochs-1,initial_epochs-1],
-          plt.ylim(), label='Start Fine Tuning')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
+if args.plot:
+    plt.figure(figsize=(8, 8))
+    plt.subplot(2, 1, 1)
+    plt.plot(acc, label='Training Accuracy')
+    plt.plot(val_acc, label='Validation Accuracy')
+    plt.ylim([0.8, 1])
+    plt.plot([initial_epochs-1,initial_epochs-1],
+              plt.ylim(), label='Start Fine Tuning')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
 
-plt.subplot(2, 1, 2)
-plt.plot(loss, label='Training Loss')
-plt.plot(val_loss, label='Validation Loss')
-plt.ylim([0, 1.0])
-plt.plot([initial_epochs-1,initial_epochs-1],
-         plt.ylim(), label='Start Fine Tuning')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.xlabel('epoch')
-plt.show()
+    plt.subplot(2, 1, 2)
+    plt.plot(loss, label='Training Loss')
+    plt.plot(val_loss, label='Validation Loss')
+    plt.ylim([0, 1.0])
+    plt.plot([initial_epochs-1,initial_epochs-1],
+             plt.ylim(), label='Start Fine Tuning')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('epoch')
+    plt.show()
 
 ## 5. Evaluate the performance of the model
 
@@ -201,6 +238,6 @@ loss, accuracy = model.evaluate(test_ds)
 print('Test accuracy :', accuracy)
 
 # Save the model in the current folder 
-model_name = os.path.join(save_dir, "classifier.h5")
-model.save(model_name) 
-print('Model saved at ', model_name)
+model_path = os.path.join(modelDir, modelFile)
+model.save(model_path) 
+print('Model saved at ', model_path)
