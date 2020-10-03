@@ -30,7 +30,6 @@ parser.add_argument('--it2',default=1500, help='Iterations 2',type=int)
 parser.add_argument('--dropout',default=0.6, help='Dropout',type=float)
 parser.add_argument('--horizontalFlip',default=False, help='Horizontal flip',type=str2bool)
 parser.add_argument('--verticalFlip',default=False, help='Vertical flip',type=str2bool)
-parser.add_argument('--randomSeed',default=1993, help='Random seed',type=int)
 parser.add_argument('--randomRotation',default=0.0, help='Random rotation',type=float)
 
 parser.add_argument('--plot',default=True, help='Plot figures',type=str2bool)
@@ -46,7 +45,6 @@ it2 = args.it2
 dropout = args.dropout
 horizontalFlip = args.horizontalFlip
 verticalFlip = args.verticalFlip
-randomseed = args.randomSeed
 randomRotation = args.randomRotation
 modelFile = args.modelFile
 
@@ -61,7 +59,6 @@ train_ds = image_dataset_from_directory(
     imgDir,
     validation_split=0.2,
     subset="training",
-    seed=randomseed,
     image_size=image_size,
     batch_size=batch_size,
     label_mode='categorical'
@@ -70,11 +67,11 @@ val_ds = image_dataset_from_directory(
     imgDir,
     validation_split=0.2,
     subset="validation",
-    seed=randomseed,
     image_size=image_size,
     batch_size=batch_size,
     label_mode='categorical'
 )
+
 
 print("* Then take 20% out of the validation set for final testing.")
 val_batches = tf.data.experimental.cardinality(val_ds)
