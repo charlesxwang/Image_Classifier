@@ -62,6 +62,7 @@ print('horizontalFlip = {}'.format(horizontalFlip))
 print('verticalFlip = {}'.format(verticalFlip))
 print('randomseed = {}'.format(randomseed))
 print('randomRotation = {}'.format(randomRotation))
+print('args.batch_size = {}'.format(args.batch_size))
 print('modelFile = {}'.format(modelFile))
 
 
@@ -124,9 +125,15 @@ base_model.trainable = False
 
 # Augmentation
 aug_list = []
-if horizontalFlip: aug_list.append(tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal'))
-if verticalFlip: aug_list.append(tf.keras.layers.experimental.preprocessing.RandomFlip('vertical'))
-if randomRotation>0.0: aug_list.append(tf.keras.layers.experimental.preprocessing.RandomRotation(randomRotation))
+if horizontalFlip: 
+    aug_list.append(tf.keras.layers.experimental.preprocessing.RandomFlip('horizontal'))
+    print('Horizontal flip applied')
+if verticalFlip: 
+    aug_list.append(tf.keras.layers.experimental.preprocessing.RandomFlip('vertical'))
+    print('Vertical flip applied')
+if randomRotation>0.0: 
+    aug_list.append(tf.keras.layers.experimental.preprocessing.RandomRotation(randomRotation))
+    print('Random rotation = {} applied'.format(randomRotation))
 if len(aug_list)>0: data_augmentation = tf.keras.Sequential(aug_list)
 
 # Pre-processing layer
