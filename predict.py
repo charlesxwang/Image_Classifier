@@ -48,11 +48,10 @@ for img_path in imgList:
   x = image.img_to_array(img)
   x = np.expand_dims(x, axis=0)
   prediction = model.predict(x)
-  print(prediction)
   prediction = np.argmax(prediction[0])
   predictions.append(prediction)
   #classNames[prediction]
-print(predictions)
+
 
 if classNames:
     for i,p in enumerate(predictions):

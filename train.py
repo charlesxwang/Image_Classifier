@@ -47,9 +47,22 @@ it2 = args.it2
 dropout = args.dropout
 horizontalFlip = args.horizontalFlip
 verticalFlip = args.verticalFlip
-randomseed = randomseed if args.randomSeed else random.randrange(1e8)
+randomseed = args.randomSeed if args.randomSeed else random.randrange(1e8)
 randomRotation = args.randomRotation
 modelFile = args.modelFile
+
+print('imgDir = {}'.format(imgDir))
+print('modelDir = {}'.format(modelDir))
+print('lr1 = {}'.format(lr1))
+print('lr2 = {}'.format(lr2))
+print('it1 = {}'.format(it1))
+print('it2 = {}'.format(it2))
+print('dropout = {}'.format(dropout))
+print('horizontalFlip = {}'.format(horizontalFlip))
+print('verticalFlip = {}'.format(verticalFlip))
+print('randomseed = {}'.format(randomseed))
+print('randomRotation = {}'.format(randomRotation))
+print('modelFile = {}'.format(modelFile))
 
 
 ## 1. Prepare data
@@ -77,7 +90,6 @@ val_ds = image_dataset_from_directory(
     label_mode='categorical'
 )
 
-exit()
 
 print("* Then take 20% out of the validation set for final testing.")
 val_batches = tf.data.experimental.cardinality(val_ds)
